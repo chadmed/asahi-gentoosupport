@@ -1,0 +1,3 @@
+[submodule "asahi-plymouth"]
+	path = asahi-plymouth
+	url = https://github.com/chadmed/asahi-plymouth
