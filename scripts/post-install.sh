@@ -166,6 +166,29 @@ make_kernel() {
         fi
 }
 
+
+install_wifi_fw() {
+        echo "We will now install the WiFi firmware to /lib/firmware."
+        echo
+        echo "Be sure to install whatever userspace network/WiFi management"
+        echo "software you want before you reboot."
+        read -sp "Press Enter to continue..."
+        echo
+        echo "Extracting WiFi firmware"
+
+        while [[ -n /boot/efi/linux-firmware.tar ]]; do
+                echo "linux-firmware.tar not found on /boot/efi."
+                echo "Please ensure the EFI System Partition set up"
+                echo "by the Asahi Installer is mounted at /boot/efi."
+                echo
+                read -sp "Press Enter to try again..."
+        done
+
+        cd /lib/firmware/brcm/
+        exec tar xpf /boot/efi/linux-firmware.tar
+        echo "WiFi firmware installed."
+        read -sp "Press Enter to continue..."
+
 install_plymouth() {
         echo "Normally, this is where we would install Plymouth and"
         echo "the Asahi splash screen. However, since Plymouth requires"
