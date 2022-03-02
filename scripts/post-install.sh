@@ -152,17 +152,37 @@ make_kernel() {
                 # If user picked clang config, add LLVM and LLVM_IAS to make
                 if [[ ${E} == "2" ]]; then
                         exec make LLVM=1 LLVM_IAS=1 -j $(nproc)
+                        KERNVER=$(make LLVM=1 LLVM_IAS=1 -s kernelrelease)
                 else
                         exec make -j $(nproc)
+                        KERNVER=$(make -s kernelrelease)
                 fi
-                # Place our dracut conf
-                mv /etc/dracut.conf /etc/dracut.bak
-                cp resources/dracut.conf /etc/dracut.conf
 
                 exec make modules_install
-                exec make install
-                exec dracut
-                # We need to ensure the GRUB version
+                # Gentoo's GRUB expects Image and the initramfs to be
+                # in pairs with the same release tag with the tag
+                # -linux taking precedence over all others. If
+                # a kernel already exists with that tag, we need to
+                # move it so that our kernel and initramfs become the
+                # default booted
+                if [[ -e /boot/vmlinu{x,z}-linux ]]; then
+                        mv /boot/vmlinu{x,z}-linux /boot/vmlinu{x,z}-old
+                fi
+                if [[ -e /boot/initramfs-linux.img ]]; then
+                        mv /boot/initramfs-linux.img /boot/initramfs-old.img
+                cp arch/arm64/boot/Image /boot/vmlinux-linux
+
+                # We must manually ensure that dracut finds the kernel
+                # and nvme-apple
+                exec dracut \
+                     --force \
+                     --quiet \
+                     --add-drivers="nvme-apple" \
+                     --kver ${KERNVER} \
+                     --compress gzip \
+                     /boot/initramfs-linux.img
+
+                # We need to rebuild the GRUB config
                 exec grub-mkconfig -o /boot/grub/grub.cfg
         fi
 }
