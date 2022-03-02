@@ -191,6 +191,9 @@ make_kernel() {
 install_wifi_fw() {
         echo "We will now install the WiFi firmware to /lib/firmware."
         echo
+        echo "If you have not already merged sys-firmware/linux-firmware,"
+        echo "please do so now before continuing."
+        echo
         echo "Be sure to install whatever userspace network/WiFi management"
         echo "software you want before you reboot."
         read -sp "Press Enter to continue..."
