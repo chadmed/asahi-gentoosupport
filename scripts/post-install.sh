@@ -9,6 +9,7 @@ install_makeconf() {
         A="n"
         echo "This will rename your make.conf to make.bak and replace it"
         echo "with the default provided by this repo."
+        echo
         read -p "Do you wish to do this (y/N)? " A
         while [[ ${A} != "Y" || "y" || "N" || "n" ]]; do
                 read -p "You must say 'y' or 'n'" A
@@ -34,6 +35,7 @@ install_overlay() {
         echo "for Apple Silicon devices."
         echo "For more information, visit"
         echo "https://github.com/chadmed/asahi-overlay/"
+        echo
         read -p "Do you wish to install the Asahi overlay (Y/n)? " B
         while [[ ${B} != "Y" || "y" || "N" || "n" ]]; do
                 read -p "You must say 'y' or 'n'" B
@@ -90,6 +92,7 @@ set_kernconf() {
         echo "Even if you know what you are doing, our default config"
         echo "is a known-good starting point you can use for your own"
         echo "customisations."
+        echo
         read -p "Do you wish to use our kernel .config (Y/n)? " D
         while [[ ${D} != "Y" || "y" || "N" || "n" ]]; do
                 read -p "You must say 'y' or 'n'" D
@@ -127,6 +130,7 @@ make_kernel() {
         echo "i.e. you are not using the default m1n1 + U-Boot + GRUB"
         echo "setup. This will take ~5-10 minutes. If you are using a laptop,"
         echo "you should plug it in before proceeding."
+        echo
         read -p "Do you want to install the kernel now (Y/n)? " F
         while [[ ${F} != "Y" || "y" || "N" || "n" ]]; do
                 read -p "You must say 'y' or 'n'" F
@@ -169,6 +173,7 @@ install_plymouth() {
         echo "controller driver, there is no point in installing it at"
         echo "this stage. Once the DCP driver has been merged into"
         echo "linux-asahi, we will install Plymouth too."
+        echo
         read -sp "Press Enter to continue..."
 }
 
@@ -201,5 +206,6 @@ install_plymouth()
 echo "We will now reboot your machine to apply the changes you have made."
 echo "If you have anything open, please make sure you save it before"
 echo "continuing."
+echo
 read -sp "Press Enter to reboot..."
 exec reboot
