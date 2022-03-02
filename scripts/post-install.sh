@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright 2022 chadmed <jcalligeros99@gmail.com>
+# Copyright 2022 James Calligeros <jcalligeros99@gmail.com>
 # SPDX-License-Identifier: MIT
 
 set -e
