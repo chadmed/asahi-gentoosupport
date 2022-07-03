@@ -18,8 +18,9 @@ echo "Creating bootstrap initramfs..."
 mkdir root
 cd root
 mkdir -p bin dev etc lib mnt proc sbin sys tmp var new_root
-# TODO: BusyBox site is down!
-curl -L https://busybox.net/downloads/path-to-latest-aarch64-bb -o bin/busybox
+
+curl -L https://busybox.net/downloads/binaries/1.31.0-defconfig-multiarch-musl/busybox-armv8l \
+     -o bin/busybox
 cp ../image.squashfs .
 cp -r /lib/firmware lib/.
 cp -r /lib/modules lib/.
