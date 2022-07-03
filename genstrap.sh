@@ -25,7 +25,7 @@ cp ../image.squashfs .
 cp -r /lib/firmware lib/.
 cp -r /lib/modules lib/.
 cp ../resources/initramfs_init.sh init
-chmod x+ init
+chmod +x init
 find . | cpio -ov --format=newc | zstdmt > ../boostrap_image.img
 cd ..
 
