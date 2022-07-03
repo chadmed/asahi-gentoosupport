@@ -26,7 +26,8 @@ cp -r /lib/firmware lib/.
 cp -r /lib/modules lib/.
 cp ../resources/initramfs_init.sh init
 chmod +x init
-find . | cpio -ov --format=newc | zstdmt > ../boostrap_image.img
+chmod +x bin/busybox
+find . | cpio -ov --format=newc | gzip -9 > ../bootstrap_image.img
 cd ..
 
 echo "WARNING: This step will relocate the default Asahi Linux initramfs"
