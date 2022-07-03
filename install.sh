@@ -84,108 +84,108 @@ merge_kernel_sources() {
         fi
 }
 
+# TODO: create a valid kernel config
+#set_kernconf() {
+#        D="y"
+#        echo "We also provide a default kernel configuration that will"
+#        echo "work for all devices. We can install this for you now."
+#        echo "Say y here unless you really know what you are doing."
+#        echo "Even if you know what you are doing, our default config"
+#        echo "is a known-good starting point you can use for your own"
+#        echo "customisations."
+#        echo
+#        read -p "Do you wish to use our kernel .config (Y/n)? " D
+#        while [[ ${D} != "Y" || "y" || "N" || "n" ]]; do
+#                read -p "You must say 'y' or 'n'" D
+#        done
+#
+#        if [[ ${D} == "N" || "n" ]]; then
+#                break
+#        fi
+#
+#        if [[ ${D} == "Y" || "y" ]]; then
+#                E="1"
+#                echo "Available .config variants:"
+#                echo "(1) gcc"
+#                echo "(2) clang w/ ThinLTO"
+#                read -p "Make your selection (default: 1): " E
+#                while [[ ${E} != "1" || "2" ]]; do
+#                        read -p "You must say '1' or '2'" E
+#                done
+#                if [[ ${E} == "1" ]]; then
+#                        cp resources/gccconf /usr/src/linux/.config
+#                        echo "GCC .config installed to /usr/src/linux/"
+#                fi
+#                if [[ ${E} == "2" ]]; then
+#                        cp resources/clangconf /usr/src/linux/.config
+#                        echo "Clang .config installed to /usr/src/linux"
+#                fi
+#        fi
+#}
 
-set_kernconf() {
-        D="y"
-        echo "We also provide a default kernel configuration that will"
-        echo "work for all devices. We can install this for you now."
-        echo "Say y here unless you really know what you are doing."
-        echo "Even if you know what you are doing, our default config"
-        echo "is a known-good starting point you can use for your own"
-        echo "customisations."
-        echo
-        read -p "Do you wish to use our kernel .config (Y/n)? " D
-        while [[ ${D} != "Y" || "y" || "N" || "n" ]]; do
-                read -p "You must say 'y' or 'n'" D
-        done
 
-        if [[ ${D} == "N" || "n" ]]; then
-                break
-        fi
-
-        if [[ ${D} == "Y" || "y" ]]; then
-                E="1"
-                echo "Available .config variants:"
-                echo "(1) gcc"
-                echo "(2) clang w/ ThinLTO"
-                read -p "Make your selection (default: 1): " E
-                while [[ ${E} != "1" || "2" ]]; do
-                        read -p "You must say '1' or '2'" E
-                done
-                if [[ ${E} == "1" ]]; then
-                        cp resources/gccconf /usr/src/linux/.config
-                        echo "GCC .config installed to /usr/src/linux/"
-                fi
-                if [[ ${E} == "2" ]]; then
-                        cp resources/clangconf /usr/src/linux/.config
-                        echo "Clang .config installed to /usr/src/linux"
-                fi
-        fi
-}
-
-
-make_kernel() {
-        F="Y"
-        echo "Do you want us to build and install the kernel for you now?"
-        echo "Say y here unless you have a non-standard boot chain,"
-        echo "i.e. you are not using the default m1n1 + U-Boot + GRUB"
-        echo "setup. This will take ~5-10 minutes. If you are using a laptop,"
-        echo "you should plug it in before proceeding."
-        echo
-        read -p "Do you want to install the kernel now (Y/n)? " F
-        while [[ ${F} != "Y" || "y" || "N" || "n" ]]; do
-                read -p "You must say 'y' or 'n'" F
-        done
-
-        if [[ ${F} == "N" || "n" ]]; then
-                break
-        fi
-
-        if [[ ${F} == "Y" || "y" ]]; then
-                # Check if dracut is installed
-                if [[ -n /usr/bin/dracut ]]; then
-                exec EMERGE_DEFAULT_OPTS="" \
-                     emerge -qv dracut
-                fi
-
-                cd /usr/src/linux
-                # If user picked clang config, add LLVM and LLVM_IAS to make
-                if [[ ${E} == "2" ]]; then
-                        exec make LLVM=1 LLVM_IAS=1 -j $(nproc)
-                        KERNVER=$(make LLVM=1 LLVM_IAS=1 -s kernelrelease)
-                else
-                        exec make -j $(nproc)
-                        KERNVER=$(make -s kernelrelease)
-                fi
-
-                exec make modules_install
-                # Gentoo's GRUB expects Image and the initramfs to be
-                # in pairs with the same release tag with the tag
-                # -linux taking precedence over all others. If
-                # a kernel already exists with that tag, we need to
-                # move it so that our kernel and initramfs become the
-                # default booted
-                if [[ -e /boot/vmlinu{x,z}-linux ]]; then
-                        mv /boot/vmlinu{x,z}-linux /boot/vmlinu{x,z}-old
-                fi
-                if [[ -e /boot/initramfs-linux.img ]]; then
-                        mv /boot/initramfs-linux.img /boot/initramfs-old.img
-                cp arch/arm64/boot/Image /boot/vmlinux-linux
-
-                # We must manually ensure that dracut finds the kernel
-                # and nvme-apple
-                exec dracut \
-                     --force \
-                     --quiet \
-                     --add-drivers="nvme-apple" \
-                     --kver ${KERNVER} \
-                     --compress gzip \
-                     /boot/initramfs-linux.img
-
-                # We need to rebuild the GRUB config
-                exec grub-mkconfig -o /boot/grub/grub.cfg
-        fi
-}
+# make_kernel() {
+#         F="Y"
+#         echo "Do you want us to build and install the kernel for you now?"
+#         echo "Say y here unless you have a non-standard boot chain,"
+#         echo "i.e. you are not using the default m1n1 + U-Boot + GRUB"
+#         echo "setup. This will take ~5-10 minutes. If you are using a laptop,"
+#         echo "you should plug it in before proceeding."
+#         echo
+#         read -p "Do you want to install the kernel now (Y/n)? " F
+#         while [[ ${F} != "Y" || "y" || "N" || "n" ]]; do
+#                 read -p "You must say 'y' or 'n'" F
+#         done
+#
+#         if [[ ${F} == "N" || "n" ]]; then
+#                 break
+#         fi
+#
+#         if [[ ${F} == "Y" || "y" ]]; then
+#                 # Check if dracut is installed
+#                 if [[ -n /usr/bin/dracut ]]; then
+#                 exec EMERGE_DEFAULT_OPTS="" \
+#                      emerge -qv dracut
+#                 fi
+#
+#                 cd /usr/src/linux
+#                 # If user picked clang config, add LLVM and LLVM_IAS to make
+#                 if [[ ${E} == "2" ]]; then
+#                         exec make LLVM=1 LLVM_IAS=1 -j $(nproc)
+#                         KERNVER=$(make LLVM=1 LLVM_IAS=1 -s kernelrelease)
+#                 else
+#                         exec make -j $(nproc)
+#                         KERNVER=$(make -s kernelrelease)
+#                 fi
+#
+#                 exec make modules_install
+#                 # Gentoo's GRUB expects Image and the initramfs to be
+#                 # in pairs with the same release tag with the tag
+#                 # -linux taking precedence over all others. If
+#                 # a kernel already exists with that tag, we need to
+#                 # move it so that our kernel and initramfs become the
+#                 # default booted
+#                 if [[ -e /boot/vmlinu{x,z}-linux ]]; then
+#                         mv /boot/vmlinu{x,z}-linux /boot/vmlinu{x,z}-old
+#                 fi
+#                 if [[ -e /boot/initramfs-linux.img ]]; then
+#                         mv /boot/initramfs-linux.img /boot/initramfs-old.img
+#                 cp arch/arm64/boot/Image /boot/vmlinux-linux
+#
+#                 # We must manually ensure that dracut finds the kernel
+#                 # and nvme-apple
+#                 exec dracut \
+#                      --force \
+#                      --quiet \
+#                      --add-drivers="nvme-apple" \
+#                      --kver ${KERNVER} \
+#                      --compress gzip \
+#                      /boot/initramfs-linux.img
+#
+#                # We need to rebuild the GRUB config
+#                exec grub-mkconfig -o /boot/grub/grub.cfg
+#        fi
+#}
 
 
 install_wifi_fw() {
@@ -213,16 +213,16 @@ install_wifi_fw() {
         echo "WiFi firmware installed."
         read -sp "Press Enter to continue..."
 
-install_plymouth() {
-        echo "Normally, this is where we would install Plymouth and"
-        echo "the Asahi splash screen. However, since Plymouth requires"
-        echo "kernel modesetting, which itself requires a proper display"
-        echo "controller driver, there is no point in installing it at"
-        echo "this stage. Once the DCP driver has been merged into"
-        echo "linux-asahi, we will install Plymouth too."
-        echo
-        read -sp "Press Enter to continue..."
-}
+# install_plymouth() {
+#         echo "Normally, this is where we would install Plymouth and"
+#         echo "the Asahi splash screen. However, since Plymouth requires"
+#         echo "kernel modesetting, which itself requires a proper display"
+#         echo "controller driver, there is no point in installing it at"
+#         echo "this stage. Once the DCP driver has been merged into"
+#         echo "linux-asahi, we will install Plymouth too."
+#         echo
+#         read -sp "Press Enter to continue..."
+# }
 
 
 if [[ whoami != "root" ]]; then
@@ -248,7 +248,7 @@ if [[ ${D} == "Y" || "y" ]]; then
         make_kernel()
 fi
 
-install_plymouth()
+# install_plymouth()
 
 echo "We will now reboot your machine to apply the changes you have made."
 echo "If you have anything open, please make sure you save it before"
