@@ -5,6 +5,7 @@
 
 set -e
 
+
 # TODO: create a make.conf
 # install_makeconf() {
 #         A="n"
@@ -30,27 +31,41 @@ set -e
 
 
 install_overlay() {
-        B="y"
-        echo "It is strongly recommended that you make use of the Asahi"
-        echo "overlay to ensure any packages you install have been patched"
-        echo "for Apple Silicon devices."
-        echo "For more information, visit"
+        echo "Installing the Asahi Overlay. For more information, visit"
         echo "https://github.com/chadmed/asahi-overlay/"
         echo
-        read -p "Do you wish to install the Asahi overlay (Y/n)? " B
-        while [[ ${B} != "Y" || "y" || "N" || "n" ]]; do
-                read -p "You must say 'y' or 'n'" B
-        done
 
-        if [[ ${B} == "n" || "N" ]]; then
-                break
-        fi
+        cp resources/repo.conf /etc/portage/repos.conf/asahi.conf
+        emaint sync -r asahi
+        echo "The Asahi overlay has been installed."
+}
 
-        if [[ ${B} == "y" || "Y" ]]; then
-                cp resources/repo.conf /etc/portage/repos.conf/asahi.conf
-                exec emaint sync -r asahi
-                echo "The Asahi overlay has been installed."
-        fi
+
+install_uboot() {
+        echo "Installing U-Boot."
+        exec EMERGE_DEFAULT_OPTS="" \
+             emerge -qv uboot
+        echo "U-Boot has been installed."
+}
+
+
+install_grub() {
+        echo "Installing GRUB."
+        exec USE="grub_platforms_efi-64" \
+             EMERGE_DEFAULT_OPTS="" \
+             emerge -qv grub:2
+        echo "GRUB has been installed."
+}
+
+
+install_m1n1() {
+        echo "Installing m1n1."
+        cp resources/update-m1n1.sh /bin/update-m1n1
+        chmod a+x /bin/update-m1n1
+        exec EMERGE_DEFAULT_OPTS="" \
+             emerge -qv m1n1
+        exec /bin/update-m1n1
+        echo "m1n1 has been installed."
 }
 
 
@@ -84,112 +99,89 @@ merge_kernel_sources() {
         fi
 }
 
-# TODO: create a valid kernel config
-#set_kernconf() {
-#        D="y"
-#        echo "We also provide a default kernel configuration that will"
-#        echo "work for all devices. We can install this for you now."
-#        echo "Say y here unless you really know what you are doing."
-#        echo "Even if you know what you are doing, our default config"
-#        echo "is a known-good starting point you can use for your own"
-#        echo "customisations."
-#        echo
-#        read -p "Do you wish to use our kernel .config (Y/n)? " D
-#        while [[ ${D} != "Y" || "y" || "N" || "n" ]]; do
-#                read -p "You must say 'y' or 'n'" D
-#        done
-#
-#        if [[ ${D} == "N" || "n" ]]; then
-#                break
-#        fi
-#
-#        if [[ ${D} == "Y" || "y" ]]; then
-#                E="1"
-#                echo "Available .config variants:"
-#                echo "(1) gcc"
-#                echo "(2) clang w/ ThinLTO"
-#                read -p "Make your selection (default: 1): " E
-#                while [[ ${E} != "1" || "2" ]]; do
-#                        read -p "You must say '1' or '2'" E
-#                done
-#                if [[ ${E} == "1" ]]; then
-#                        cp resources/gccconf /usr/src/linux/.config
-#                        echo "GCC .config installed to /usr/src/linux/"
-#                fi
-#                if [[ ${E} == "2" ]]; then
-#                        cp resources/clangconf /usr/src/linux/.config
-#                        echo "Clang .config installed to /usr/src/linux"
-#                fi
-#        fi
-#}
+
+set_kernconf() {
+       D="y"
+       echo "We can copy the Asahi Linux kernel config to /usr/src/linux"
+       echo "for you to work off as a base rather than having to start with"
+       echo "a blank slate. Say y here unless you really know what you are"
+       echo "doing."
+       read -p "Do you wish to use our kernel .config (Y/n)? " D
+       while [[ ${D} != "Y" || "y" || "N" || "n" ]]; do
+               read -p "You must say 'y' or 'n'" D
+       done
+
+       if [[ ${D} == "N" || "n" ]]; then
+               break
+       fi
+
+       if [[ ${D} == "Y" || "y" ]]; then
+               zcat /proc/config.gz > /usr/src/linux/.config
+       fi
+}
 
 
-# make_kernel() {
-#         F="Y"
-#         echo "Do you want us to build and install the kernel for you now?"
-#         echo "Say y here unless you have a non-standard boot chain,"
-#         echo "i.e. you are not using the default m1n1 + U-Boot + GRUB"
-#         echo "setup. This will take ~5-10 minutes. If you are using a laptop,"
-#         echo "you should plug it in before proceeding."
-#         echo
-#         read -p "Do you want to install the kernel now (Y/n)? " F
-#         while [[ ${F} != "Y" || "y" || "N" || "n" ]]; do
-#                 read -p "You must say 'y' or 'n'" F
-#         done
-#
-#         if [[ ${F} == "N" || "n" ]]; then
-#                 break
-#         fi
-#
-#         if [[ ${F} == "Y" || "y" ]]; then
-#                 # Check if dracut is installed
-#                 if [[ -n /usr/bin/dracut ]]; then
-#                 exec EMERGE_DEFAULT_OPTS="" \
-#                      emerge -qv dracut
-#                 fi
-#
-#                 cd /usr/src/linux
-#                 # If user picked clang config, add LLVM and LLVM_IAS to make
-#                 if [[ ${E} == "2" ]]; then
-#                         exec make LLVM=1 LLVM_IAS=1 -j $(nproc)
-#                         KERNVER=$(make LLVM=1 LLVM_IAS=1 -s kernelrelease)
-#                 else
-#                         exec make -j $(nproc)
-#                         KERNVER=$(make -s kernelrelease)
-#                 fi
-#
-#                 exec make modules_install
-#                 # Gentoo's GRUB expects Image and the initramfs to be
-#                 # in pairs with the same release tag with the tag
-#                 # -linux taking precedence over all others. If
-#                 # a kernel already exists with that tag, we need to
-#                 # move it so that our kernel and initramfs become the
-#                 # default booted
-#                 if [[ -e /boot/vmlinu{x,z}-linux ]]; then
-#                         mv /boot/vmlinu{x,z}-linux /boot/vmlinu{x,z}-old
-#                 fi
-#                 if [[ -e /boot/initramfs-linux.img ]]; then
-#                         mv /boot/initramfs-linux.img /boot/initramfs-old.img
-#                 cp arch/arm64/boot/Image /boot/vmlinux-linux
-#
-#                 # We must manually ensure that dracut finds the kernel
-#                 # and nvme-apple
-#                 exec dracut \
-#                      --force \
-#                      --quiet \
-#                      --add-drivers="nvme-apple" \
-#                      --kver ${KERNVER} \
-#                      --compress gzip \
-#                      /boot/initramfs-linux.img
-#
-#                # We need to rebuild the GRUB config
-#                exec grub-mkconfig -o /boot/grub/grub.cfg
-#        fi
-#}
+make_kernel() {
+        F="Y"
+        echo "Do you want us to build and install the kernel for you now?"
+        echo "Say y here unless you have a non-standard boot chain,"
+        echo "i.e. you are not using the default m1n1 + U-Boot + GRUB"
+        echo "setup. This will take ~5-10 minutes. If you are using a laptop,"
+        echo "you should plug it in before proceeding."
+        echo
+        read -p "Do you want to install the kernel now (Y/n)? " F
+        while [[ ${F} != "Y" || "y" || "N" || "n" ]]; do
+                read -p "You must say 'y' or 'n'" F
+        done
+
+        if [[ ${F} == "N" || "n" ]]; then
+                break
+        fi
+
+        if [[ ${F} == "Y" || "y" ]]; then
+                # Check if dracut is installed
+                if [[ -n /usr/bin/dracut ]]; then
+                exec EMERGE_DEFAULT_OPTS="" \
+                     emerge -qv dracut
+                fi
+
+                make -C /usr/src/linux -j $(nproc)
+                KERNVER=$(make -C /usr/src/linux -s kernelrelease)
+
+                make -C /usr/src/linux modules_install
+                # Gentoo's GRUB expects Image and the initramfs to be
+                # in pairs with the same release tag, with the tag
+                # -linux taking precedence over all others. If
+                # a kernel already exists with that tag, we need to
+                # move it so that our kernel and initramfs become the
+                # default booted
+                if [[ -e /boot/vmlinu{x,z}-linux ]]; then
+                        mv /boot/vmlinu{x,z}-linux /boot/vmlinu{x,z}-old
+                fi
+                if [[ -e /boot/initramfs-linux.img ]]; then
+                        mv /boot/initramfs-linux.img /boot/initramfs-old.img
+                cp /usr/src/linux/arch/arm64/boot/Image /boot/vmlinux-linux
+
+                # We must manually ensure that dracut finds the kernel
+                # and nvme-apple
+                exec dracut \
+                     --force \
+                     --quiet \
+                     --add-drivers="nvme-apple" \
+                     --kver ${KERNVER} \
+                     --compress gzip \
+                     /boot/initramfs-linux.img
+
+               # We need to rebuild GRUB
+               cp resources/update-grub.sh /bin/update-grub
+               chmod a+x /bin/update-grub
+               exec /bin/update-grub
+       fi
+}
 
 
-install_wifi_fw() {
-        echo "We will now install the WiFi firmware to /lib/firmware."
+install_fw() {
+        echo "We will now install the Apple Silicon firmware to /lib/firmware."
         echo
         echo "If you have not already merged sys-firmware/linux-firmware,"
         echo "please do so now before continuing."
@@ -198,7 +190,7 @@ install_wifi_fw() {
         echo "software you want before you reboot."
         read -sp "Press Enter to continue..."
         echo
-        echo "Extracting WiFi firmware"
+        echo "Extracting firmware"
 
         while [[ -n /boot/efi/linux-firmware.tar ]]; do
                 echo "linux-firmware.tar not found on /boot/efi."
@@ -208,21 +200,11 @@ install_wifi_fw() {
                 read -sp "Press Enter to try again..."
         done
 
-        cd /lib/firmware/brcm/
-        exec tar xpf /boot/efi/linux-firmware.tar
-        echo "WiFi firmware installed."
+        cp resources/update-vendor-fw.sh /bin/update-vendor-fw
+        chmod a+x /bin/update-vendor-fw
+        exec /bin/update-vendor-fw
+        echo "Firmware installed."
         read -sp "Press Enter to continue..."
-
-# install_plymouth() {
-#         echo "Normally, this is where we would install Plymouth and"
-#         echo "the Asahi splash screen. However, since Plymouth requires"
-#         echo "kernel modesetting, which itself requires a proper display"
-#         echo "controller driver, there is no point in installing it at"
-#         echo "this stage. Once the DCP driver has been merged into"
-#         echo "linux-asahi, we will install Plymouth too."
-#         echo
-#         read -sp "Press Enter to continue..."
-# }
 
 
 if [[ whoami != "root" ]]; then
@@ -230,29 +212,33 @@ if [[ whoami != "root" ]]; then
         exit
 fi
 
-echo "This script will set up your system as per the readme."
+echo "This script automates the setup and configuration of Apple Silicon"
+echo "specific tooling. Please ensure that /boot is mounted where you want, and"
+echo "the Asahi EFI System Partition is mounted to /boot/efi."
 read -sp "Press Enter to continue..."
 
 
-install_makeconf()
+# install_makeconf()
 
 install_overlay()
 
-# Only ask about asahi-sources if the overlay was installed
-if [[ ${B} == "y" || "Y" ]]; then
-        merge_kernel_sources()
-fi
+install_uboot()
+
+install_grub()
+
+install_m1n1()
+
+merge_kernel_sources()
 
 # Only offer to make kernel if our .config is used
 if [[ ${D} == "Y" || "y" ]]; then
         make_kernel()
+else
+        echo "Asahi .config not used, skipping kernel build."
 fi
 
-# install_plymouth()
+install_fw()
 
-echo "We will now reboot your machine to apply the changes you have made."
-echo "If you have anything open, please make sure you save it before"
-echo "continuing."
-echo
-read -sp "Press Enter to reboot..."
-exec reboot
+echo "This script will now exit. Continue setting up your machine as per the"
+echo "Gentoo Handbook, skipping the steps related to setting up the kernel or"
+echo "GRUB as these have been done for you."
