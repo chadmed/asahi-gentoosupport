@@ -1,10 +1,9 @@
-menuentry 'Gentoo Live Install Environment' --class gentoo --class gnu-linux -class os $menuentry_id_option 'gnulinux-simple' {
+menuentry 'Gentoo Live Install Environment' --class gentoo --class gnu-linux -class os {
         load_video
         set gfxpayload=keep
         insmod gzio
         insmod part_gpt
         insmod ext2
-        search --no-floppy --fs-uuid
         echo    'Loading Linux linux-asahi ...'
         linux   /boot/vmlinuz-linux-asahi root=live:/squash.img ro earlycon debug
         echo    'Loading initial ramdisk ...'

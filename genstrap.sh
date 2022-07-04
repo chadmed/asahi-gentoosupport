@@ -21,7 +21,7 @@ read -sp "Press Enter to continue."
 echo
 
 echo "Installing dependencies..."
-# pacman -S squashfs-tools dracut cpio
+pacman -S squashfs-tools dracut cpio
 
 echo "Extracting squashfs..."
 bsdtar -xf install.iso --include image.squashfs
@@ -76,7 +76,7 @@ dracut --force \
 echo "Setting up initramfs and GRUB..."
 
 mv bootstrap_image.img /boot/initramfs-gentoo-live.img
-#cat resources/init_grub >> /boot/grub/grub.cfg
+cat resources/init_grub >> /boot/grub/grub.cfg
 
 echo "Cleaning up...."
 echo
