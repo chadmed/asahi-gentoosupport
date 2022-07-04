@@ -222,24 +222,24 @@ read -sp "Press Enter to continue..."
 
 # install_makeconf()
 
-install_overlay()
+install_overlay
 
-install_uboot()
+install_uboot
 
-install_grub()
+install_grub
 
-install_m1n1()
+install_m1n1
 
-merge_kernel_sources()
+merge_kernel_sources
 
 # Only offer to make kernel if our .config is used
 if [[ ${D} == "Y" || "y" ]]; then
-        make_kernel()
+        make_kernel
 else
         echo "Asahi .config not used, skipping kernel build."
 fi
 
-install_fw()
+install_fw
 
 echo "This script will now exit. Continue setting up your machine as per the"
 echo "Gentoo Handbook, skipping the steps related to setting up the kernel or"
