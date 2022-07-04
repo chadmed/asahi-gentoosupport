@@ -43,7 +43,7 @@ install_overlay() {
 
 install_uboot() {
         echo "Installing U-Boot."
-        exec EMERGE_DEFAULT_OPTS="" \
+        EMERGE_DEFAULT_OPTS="" \
              emerge -qv uboot
         echo "U-Boot has been installed."
 }
@@ -51,9 +51,9 @@ install_uboot() {
 
 install_grub() {
         echo "Installing GRUB."
-        exec USE="grub_platforms_efi-64" \
-             EMERGE_DEFAULT_OPTS="" \
-             emerge -qv grub:2
+        USE="grub_platforms_efi-64" \
+                EMERGE_DEFAULT_OPTS="" \
+                emerge -qv grub:2
         echo "GRUB has been installed."
 }
 
@@ -62,7 +62,7 @@ install_m1n1() {
         echo "Installing m1n1."
         cp resources/update-m1n1.sh /bin/update-m1n1
         chmod a+x /bin/update-m1n1
-        exec EMERGE_DEFAULT_OPTS="" \
+        EMERGE_DEFAULT_OPTS="" \
              emerge -qv m1n1
         exec /bin/update-m1n1
         echo "m1n1 has been installed."
@@ -92,7 +92,7 @@ merge_kernel_sources() {
                 cp resources/kerneluse /etc/portage/package.use/asahi-sources
                 # Override the user's default opts in make.conf
                 # so they aren't asked again if they want to merge
-                exec EMERGE_DEFAULT_OPTS="" \
+                EMERGE_DEFAULT_OPTS="" \
                      emerge -qv asahi-sources
                 echo "The patched kernel sources are now available in"
                 echo "/usr/src/linux."
@@ -141,7 +141,7 @@ make_kernel() {
         if [[ ${F} == "Y" || "y" ]]; then
                 # Check if dracut is installed
                 if [[ -n /usr/bin/dracut ]]; then
-                exec EMERGE_DEFAULT_OPTS="" \
+                EMERGE_DEFAULT_OPTS="" \
                      emerge -qv dracut
                 fi
 
@@ -165,7 +165,7 @@ make_kernel() {
 
                 # We must manually ensure that dracut finds the kernel
                 # and nvme-apple
-                exec dracut \
+                dracut \
                      --force \
                      --quiet \
                      --add-drivers="nvme-apple" \
