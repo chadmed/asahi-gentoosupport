@@ -2,7 +2,7 @@
 set -e
 
 m1n1_dir="/boot/efi/m1n1"
-src=/usr/lib/asahi-boot/
+src=/usr/lib/asahi-boot
 
 target="$m1n1_dir/boot.bin"
 if [ ! -z "$1" ]; then

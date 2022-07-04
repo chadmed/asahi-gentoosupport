@@ -62,126 +62,75 @@ install_m1n1() {
          echo "Installing m1n1."
          cp resources/update-m1n1.sh /bin/update-m1n1
          chmod a+x /bin/update-m1n1
-#         EMERGE_DEFAULT_OPTS="" \
-#              emerge -qv m1n1
-#         exec /bin/update-m1n1
-#         echo "m1n1 has been installed."
-        git clone --recursive --depth=1 https://github.com/AsahiLinux/m1n1/
-        cd m1n1
-        make -j$(nproc)
-        cp build/m1n1.bin /usr/lib/asahi-boot/m1n1.bin
+         if [[ -n /boot/efi ]]; then
+                mkdir /boot/efi
+        fi
+        mount /dev/nvme0n1p4 /boot/efi
+         EMERGE_DEFAULT_OPTS="" \
+              emerge -qv m1n1
+         exec /bin/update-m1n1
+         echo "m1n1 has been installed."
 }
 
 
 merge_kernel_sources() {
-        C="y"
-        echo "We provide a version of the Linux kernel with drivers and"
-        echo "other patches required to support Apple Silicon devices."
-        echo "Say y here unless you specifically want to test specific"
-        echo "upstream versions."
-        read -p "Do you wish to fetch the linux-asahi sources (Y/n)? " C
-        while [[ ${C} != "Y" || "y" || "N" || "n" ]]; do
-                read -p "You must say 'y' or 'n'" C
-        done
-
-        if [[ ${C} == "n" || "N" ]]; then
-                break
+        # Install a package.use for the kernel
+        if [[ -n /etc/portage/package.use ]]; then
+                mkdir -p /etc/portage/package.use
         fi
-
-        if [[ ${C} == "y" || "Y" ]]; then
-                # Install a package.use for the kernel
-                if [[ -n /etc/portage/package.use ]]; then
-                        mkdir -p /etc/portage/package.use
-                fi
-                cp resources/kerneluse /etc/portage/package.use/asahi-sources
-                # Override the user's default opts in make.conf
-                # so they aren't asked again if they want to merge
-                EMERGE_DEFAULT_OPTS="" \
-                     emerge -qv asahi-sources
-                echo "The patched kernel sources are now available in"
-                echo "/usr/src/linux."
-        fi
-}
-
-
-set_kernconf() {
-       D="y"
-       echo "We can copy the Asahi Linux kernel config to /usr/src/linux"
-       echo "for you to work off as a base rather than having to start with"
-       echo "a blank slate. Say y here unless you really know what you are"
-       echo "doing."
-       read -p "Do you wish to use our kernel .config (Y/n)? " D
-       while [[ ${D} != "Y" || "y" || "N" || "n" ]]; do
-               read -p "You must say 'y' or 'n'" D
-       done
-
-       if [[ ${D} == "N" || "n" ]]; then
-               break
-       fi
-
-       if [[ ${D} == "Y" || "y" ]]; then
-               zcat /proc/config.gz > /usr/src/linux/.config
-       fi
+        cp resources/kerneluse /etc/portage/package.use/asahi-sources
+        # Override the user's default opts in make.conf
+        # so they aren't asked again if they want to merge
+        EMERGE_DEFAULT_OPTS="" \
+                emerge -qv asahi-sources
+        echo "The patched kernel sources are now available in"
+        echo "/usr/src/linux."
 }
 
 
 make_kernel() {
-        F="Y"
-        echo "Do you want us to build and install the kernel for you now?"
-        echo "Say y here unless you have a non-standard boot chain,"
-        echo "i.e. you are not using the default m1n1 + U-Boot + GRUB"
-        echo "setup. This will take ~5-10 minutes. If you are using a laptop,"
-        echo "you should plug it in before proceeding."
+        echo "We are going to install a known-good kernel for you now. You"
+        echo "can edit this at any time after the install procedure has finished."
         echo
-        read -p "Do you want to install the kernel now (Y/n)? " F
-        while [[ ${F} != "Y" || "y" || "N" || "n" ]]; do
-                read -p "You must say 'y' or 'n'" F
-        done
+        read -sp "Press Enter to continue..."
+        # Check if dracut is installed
+        EMERGE_DEFAULT_OPTS="" \
+                emerge -qv dracut
 
-        if [[ ${F} == "N" || "n" ]]; then
-                break
+        zcat /proc/config.gz > /usr/src/linux/.config
+
+        make -C /usr/src/linux -j $(nproc)
+        KERNVER=$(make -C /usr/src/linux -s kernelrelease)
+
+        make -C /usr/src/linux modules_install
+        # Gentoo's GRUB expects Image and the initramfs to be
+        # in pairs with the same release tag, with the tag
+        # -linux taking precedence over all others. If
+        # a kernel already exists with that tag, we need to
+        # move it so that our kernel and initramfs become the
+        # default booted
+        if [[ -e /boot/vmlinu{x,z}-linux ]]; then
+                mv /boot/vmlinu{x,z}-linux /boot/vmlinu{x,z}-old
         fi
+        if [[ -e /boot/initramfs-linux.img ]]; then
+                mv /boot/initramfs-linux.img /boot/initramfs-old.img
+        fi
+        cp /usr/src/linux/arch/arm64/boot/Image /boot/vmlinux-linux
 
-        if [[ ${F} == "Y" || "y" ]]; then
-                # Check if dracut is installed
-                if [[ -n /usr/bin/dracut ]]; then
-                EMERGE_DEFAULT_OPTS="" \
-                     emerge -qv dracut
-                fi
+        # We must manually ensure that dracut finds the kernel
+        # and nvme-apple
+        dracut \
+                --force \
+                --quiet \
+                --add-drivers="nvme-apple" \
+                --kver ${KERNVER} \
+                --compress gzip \
+                /boot/initramfs-linux.img
 
-                make -C /usr/src/linux -j $(nproc)
-                KERNVER=$(make -C /usr/src/linux -s kernelrelease)
-
-                make -C /usr/src/linux modules_install
-                # Gentoo's GRUB expects Image and the initramfs to be
-                # in pairs with the same release tag, with the tag
-                # -linux taking precedence over all others. If
-                # a kernel already exists with that tag, we need to
-                # move it so that our kernel and initramfs become the
-                # default booted
-                if [[ -e /boot/vmlinu{x,z}-linux ]]; then
-                        mv /boot/vmlinu{x,z}-linux /boot/vmlinu{x,z}-old
-                fi
-                if [[ -e /boot/initramfs-linux.img ]]; then
-                        mv /boot/initramfs-linux.img /boot/initramfs-old.img
-                fi
-                cp /usr/src/linux/arch/arm64/boot/Image /boot/vmlinux-linux
-
-                # We must manually ensure that dracut finds the kernel
-                # and nvme-apple
-                dracut \
-                     --force \
-                     --quiet \
-                     --add-drivers="nvme-apple" \
-                     --kver ${KERNVER} \
-                     --compress gzip \
-                     /boot/initramfs-linux.img
-
-               # We need to rebuild GRUB
-               cp resources/update-grub.sh /bin/update-grub
-               chmod a+x /bin/update-grub
-               exec /bin/update-grub
-       fi
+        # We need to rebuild GRUB
+        cp resources/update-grub.sh /bin/update-grub
+        chmod a+x /bin/update-grub
+        exec /bin/update-grub
 }
 
 
@@ -232,16 +181,11 @@ install_uboot
 
 install_grub
 
-install_m1n1
-
 merge_kernel_sources
 
-# Only offer to make kernel if our .config is used
-if [[ ${D} == "Y" || "y" ]]; then
-        make_kernel
-else
-        echo "Asahi .config not used, skipping kernel build."
-fi
+make_kernel
+
+install_m1n1
 
 install_fw
 
