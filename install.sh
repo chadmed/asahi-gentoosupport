@@ -37,20 +37,21 @@ install_m1n1() {
          echo "Installing m1n1."
          cp resources/update-m1n1.sh /bin/update-m1n1
          chmod a+x /bin/update-m1n1
-         if [[ -n /boot/efi ]]; then
-                mkdir /boot/efi
-        fi
-        mount /dev/nvme0n1p4 /boot/efi
-         EMERGE_DEFAULT_OPTS="" \
-              emerge -qv m1n1
-         exec /bin/update-m1n1
-         echo "m1n1 has been installed."
+         while [[ ! -d /boot/efi ]]; do
+                echo "It seems the ESP is not mounted at /boot/efi. Please"
+                echo "rectify this in another tty and come back to continue."
+                read -sp "Press Enter to continue..."
+        done
+        EMERGE_DEFAULT_OPTS="" \
+                emerge -qv m1n1
+        update-m1n1
+        echo "m1n1 has been installed."
 }
 
 
 merge_kernel_sources() {
         # Install a package.use for the kernel
-        if [[ -n /etc/portage/package.use ]]; then
+        if [[ ! -d /etc/portage/package.use ]]; then
                 mkdir -p /etc/portage/package.use
         fi
         cp resources/kerneluse /etc/portage/package.use/asahi-sources
@@ -66,11 +67,15 @@ merge_kernel_sources() {
 make_kernel() {
         echo "We are going to install a known-good kernel for you now. You"
         echo "can edit this at any time after the install procedure has finished."
+        echo "In fact, you should edit it once you've booted in to the filesystem."
         echo
         read -sp "Press Enter to continue..."
+        echo
         # Check if dracut is installed
-        EMERGE_DEFAULT_OPTS="" \
-                emerge -qv dracut
+        if [[ ! -f /usr/bin/dracut ]]; then
+                EMERGE_DEFAULT_OPTS="" \
+                        emerge -qv dracut
+        fi
 
         zcat /proc/config.gz > /usr/src/linux/.config
 
@@ -90,7 +95,7 @@ make_kernel() {
         if [[ -e /boot/initramfs-linux.img ]]; then
                 mv /boot/initramfs-linux.img /boot/initramfs-old.img
         fi
-        cp /usr/src/linux/arch/arm64/boot/Image /boot/vmlinux-linux
+        make -C /usr/src/linux install
 
         # We must manually ensure that dracut finds the kernel
         # and nvme-apple
@@ -100,12 +105,11 @@ make_kernel() {
                 --add-drivers="nvme-apple" \
                 --kver ${KERNVER} \
                 --compress gzip \
-                /boot/initramfs-linux.img
+                /boot/initramfs-linux-${KERNVER}.img
 
         # We need to rebuild GRUB
-        cp resources/update-grub.sh /bin/update-grub
-        chmod a+x /bin/update-grub
-        exec /bin/update-grub
+        grub-install --removable --efi-directory=/boot/efi --boot-directory=/boot
+        grub-mkconfig -o /boot/grub/grub.cfg
 }
 
 
@@ -121,7 +125,7 @@ install_fw() {
         echo
         echo "Extracting firmware"
 
-        while [[ -n /boot/efi/linux-firmware.tar ]]; do
+        while [[ ! -f /boot/efi/vendorfw.tar ]]; do
                 echo "linux-firmware.tar not found on /boot/efi."
                 echo "Please ensure the EFI System Partition set up"
                 echo "by the Asahi Installer is mounted at /boot/efi."
@@ -131,7 +135,7 @@ install_fw() {
 
         cp resources/update-vendor-fw.sh /bin/update-vendor-fw
         chmod a+x /bin/update-vendor-fw
-        exec /bin/update-vendor-fw
+        update-vendor-fw
         echo "Firmware installed."
         read -sp "Press Enter to continue..."
 
@@ -148,7 +152,6 @@ read -sp "Press Enter to continue..."
 
 }
 
-# install_makeconf()
 
 install_overlay
 
