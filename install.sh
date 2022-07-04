@@ -59,13 +59,17 @@ install_grub() {
 
 
 install_m1n1() {
-        echo "Installing m1n1."
-        cp resources/update-m1n1.sh /bin/update-m1n1
-        chmod a+x /bin/update-m1n1
-        EMERGE_DEFAULT_OPTS="" \
-             emerge -qv m1n1
-        exec /bin/update-m1n1
-        echo "m1n1 has been installed."
+         echo "Installing m1n1."
+         cp resources/update-m1n1.sh /bin/update-m1n1
+         chmod a+x /bin/update-m1n1
+#         EMERGE_DEFAULT_OPTS="" \
+#              emerge -qv m1n1
+#         exec /bin/update-m1n1
+#         echo "m1n1 has been installed."
+        git clone --recursive --depth=1 https://github.com/AsahiLinux/m1n1/
+        cd m1n1
+        make -j$(nproc)
+        cp build/m1n1.bin /usr/lib/asahi-boot/m1n1.bin
 }
 
 
