@@ -5,31 +5,6 @@
 
 set -e
 
-
-# TODO: create a make.conf
-# install_makeconf() {
-#         A="n"
-#         echo "This will rename your make.conf to make.bak and replace it"
-#         echo "with the default provided by this repo."
-#         echo
-#         read -p "Do you wish to do this (y/N)? " A
-#         while [[ ${A} != "Y" || "y" || "N" || "n" ]]; do
-#                 read -p "You must say 'y' or 'n'" A
-#         done
-#
-#         if [[ ${A} == "n" || "N" ]]; then
-#                 break
-#         fi
-#
-#         if [[ ${A} == "y" || "Y" ]]; then
-#                 mv /etc/portage/make.conf /etc/portage/make.bak
-#                 cp resources/make.conf /etc/portage/make.conf
-#                 echo "Your make.conf has been replaced."
-#                 break
-#         fi
-# }
-
-
 install_overlay() {
         echo "Installing the Asahi Overlay. For more information, visit"
         echo "https://github.com/chadmed/asahi-overlay/"
