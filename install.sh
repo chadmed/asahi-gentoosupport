@@ -116,9 +116,6 @@ make_kernel() {
 install_fw() {
         echo "We will now install the Apple Silicon firmware to /lib/firmware."
         echo
-        echo "If you have not already merged sys-firmware/linux-firmware,"
-        echo "please do so now before continuing."
-        echo
         echo "Be sure to install whatever userspace network/WiFi management"
         echo "software you want before you reboot."
         read -sp "Press Enter to continue..."
@@ -132,6 +129,11 @@ install_fw() {
                 echo
                 read -sp "Press Enter to try again..."
         done
+
+        if [[ ! -d /lib/firmware ]]; then
+                echo "sys-kernel/linux-firmware linux-fw-redistributable no-source-code" >> /etc/portage/package.license
+                emerge -qv linux-firmware
+        fi
 
         cp resources/update-vendor-fw.sh /bin/update-vendor-fw
         chmod a+x /bin/update-vendor-fw
