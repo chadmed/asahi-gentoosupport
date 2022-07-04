@@ -5,13 +5,16 @@ Apple Silicon hardware.
 
 ## Quickstart guide
 1. Use the Asahi Installer to install the Asahi Linux Minimal environment
-2. Clone this repo and create a bootstrap initramfs by running `genstrap.sh`
-3. Reboot the machine. The Gentoo install environment will automatically load
-4. Format the Asahi Linux root partition as you see fit (**SEE THE NOTES**)
-5. Follow the Handbook up to and including chrooting into the new filesystem
-6. Mount the EFI System Partition created by Asahi to `/boot/efi`
-7. Clone this repo somewhere on the filesystem and run `install.sh`
-8. Reboot into your fresh new Gentoo install.
+2. Download the latest Gentoo arm64 minimal installation CD image
+3. Clone this repo
+4. Copy the Gentoo CD image to this repo and rename it `install.iso`
+5. Create a bootstrap initramfs by running `genstrap.sh`
+6. Reboot the machine. The Gentoo install environment will automatically load
+7. Format the Asahi Linux root partition as you see fit (**SEE THE NOTES**)
+8. Follow the Handbook up to and including chrooting into the new filesystem
+9. Mount the EFI System Partition created by Asahi to `/boot/efi`
+10. Clone this repo somewhere on the filesystem and run `install.sh`
+11. Reboot into your fresh new Gentoo install.
 
 ## Important notes
 It is absolutely imperative that you **DO NOT** alter **any** other partition
