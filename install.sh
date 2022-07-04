@@ -218,6 +218,7 @@ echo "specific tooling. Please ensure that /boot is mounted where you want, and"
 echo "the Asahi EFI System Partition is mounted to /boot/efi."
 read -sp "Press Enter to continue..."
 
+}
 
 # install_makeconf()
 
