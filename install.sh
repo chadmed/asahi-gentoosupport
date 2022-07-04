@@ -44,7 +44,7 @@ install_overlay() {
 install_uboot() {
         echo "Installing U-Boot."
         EMERGE_DEFAULT_OPTS="" \
-             emerge -qv uboot
+             emerge -qv u-boot
         echo "U-Boot has been installed."
 }
 
