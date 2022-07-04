@@ -160,6 +160,7 @@ make_kernel() {
                 fi
                 if [[ -e /boot/initramfs-linux.img ]]; then
                         mv /boot/initramfs-linux.img /boot/initramfs-old.img
+                fi
                 cp /usr/src/linux/arch/arm64/boot/Image /boot/vmlinux-linux
 
                 # We must manually ensure that dracut finds the kernel
