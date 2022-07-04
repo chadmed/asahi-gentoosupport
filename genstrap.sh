@@ -34,10 +34,14 @@ parted -sf /dev/ram0 mklabel gpt
 parted -sf /dev/ram0 "mkpart root 0 -1"
 mkfs.ext4 /dev/ram0p1
 mount /dev/ram0p1 /mnt/temp
+
 echo "Unsquashing Gentoo live environment."
+echo
 unsquashfs -q image.squashfs
-cd squashfs-root
+
 echo "Setting up Gentoo live environment for Apple Silicon..."
+echo
+cd squashfs-root
 rm -rf lib/firmware/{iwlwifi*,qcom,amd*,advansys,intel,nvidia,rtlwifi}
 rm -rf lib/modules/*gentoo*
 cp -r /lib/modules/$(uname -r) lib/modules/
@@ -45,10 +49,12 @@ cp -r /lib/firmware/brcm/. lib/firmware/brcm/.
 # The squashfs doesn't log in automatically for some reason?
 echo "agetty_options=\"--autologin root\"" >> etc/conf.d/agetty
 sed -i 's/\<agetty\>/& --autologin root/g' etc/inittab
-cd ..
-cp -r squashfs-root/* /mnt/temp/
+
 
 echo "Creating live image..."
+echo
+cd ..
+cp -r squashfs-root/* /mnt/temp/
 umount /dev/ram0p1
 mkdir -p squashtree/LiveOS
 dd if=/dev/ram0p1 of=squashtree/LiveOS/rootfs.img
@@ -62,6 +68,7 @@ cp new.squashfs overlay/squash.img
 cp resources/initcmdline overlay/etc/cmdline.d/01-default.conf
 
 dracut --force \
+    --quiet \
     --kver $(uname -r) \
     --add-drivers "nvme-apple" \
     --add-drivers "squashfs" \
@@ -90,4 +97,3 @@ rm -rf squashtree
 
 echo "When rebooting your system, select Gentoo Live Install environment from"
 echo "the GRUB menu to boot into the Gentoo LiveCD."
-echo
