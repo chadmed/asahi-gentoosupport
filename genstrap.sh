@@ -2,6 +2,17 @@
 
 set -e
 
+cleanup() {
+    echo "Cleaning up...."
+    echo
+    rm -rf /mnt/temp/
+    rm -rf squashfs-root
+    rm -rf image.squashfs
+    rm -rf new.squashfs
+    rm -rf overlay
+    rm -rf squashtree
+}
+
 if [[ $(whoami) != "root" ]]; then
     echo "This script must be run as root. Type your password"
     echo "when prompted."
@@ -20,8 +31,10 @@ echo
 read -sp "Press Enter to continue."
 echo
 
+cleanup
+
 echo "Installing dependencies..."
-pacman -S squashfs-tools dracut cpio
+pacman -S squashfs-tools dracut cpio parted
 
 echo "Extracting squashfs..."
 bsdtar -xf install.iso --include image.squashfs
@@ -30,6 +43,17 @@ echo "Creating temporary mount..."
 echo
 mkdir /mnt/temp
 modprobe brd rd_nr=1 rd_size=923600
+
+if [[ $? -ne 0 ]]; then
+    echo "ERROR: could not create ram block device. Installing asahi-dev"
+    echo "kernel."
+    sed -i 's/asahi/asahi-dev/' /etc/pacman.conf
+    pacman -Syu
+    echo "The asahi-dev kernel has been installed. Please reboot the machine and"
+    echo "run this script again."
+    exit 1
+fi
+
 parted -sf /dev/ram0 mklabel gpt
 parted -sf /dev/ram0 "mkpart root 0 -1"
 mkfs.ext4 /dev/ram0p1
@@ -85,15 +109,8 @@ echo "Setting up initramfs and GRUB..."
 mv bootstrap_image.img /boot/initramfs-gentoo-live.img
 cat resources/init_grub >> /boot/grub/grub.cfg
 
-echo "Cleaning up...."
-echo
-rm -rf /mnt/temp/
+cleanup
 modprobe -r brd
-rm -rf squashfs-root
-rm -rf image.squashfs
-rm -rf new.squashfs
-rm -rf overlay
-rm -rf squashtree
 
 echo "When rebooting your system, select Gentoo Live Install environment from"
 echo "the GRUB menu to boot into the Gentoo LiveCD."
