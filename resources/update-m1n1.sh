@@ -14,7 +14,7 @@ if [ ! -e "$m1n1_dir" ]; then
 	exit 1
 fi
 
-DTBS=/lib/modules/*/dtbs/*
+DTBS=/usr/src/linux/arch/arm64/boot/dts/apple/*.dtb
 
 cat "$src/m1n1.bin" $DTBS \
     <(gzip -c "$src/u-boot-nodtb.bin") \
