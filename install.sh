@@ -100,7 +100,7 @@ make_kernel() {
                 --add-drivers="nvme-apple" \
                 --kver ${KERNVER} \
                 --compress gzip \
-                /boot/initramfs-linux-${KERNVER}.img
+                /boot/initramfs-${KERNVER}.img
 
         # We need to rebuild GRUB
         grub-install --removable --efi-directory=/boot/efi --boot-directory=/boot
@@ -117,7 +117,7 @@ install_fw() {
         echo
         echo "Extracting firmware"
 
-        while [[ ! -f /boot/efi/vendorfw.tar ]]; do
+        while [[ ! -f /boot/efi/vendorfw/firmware.tar ]]; do
                 echo "linux-firmware.tar not found on /boot/efi."
                 echo "Please ensure the EFI System Partition set up"
                 echo "by the Asahi Installer is mounted at /boot/efi."
@@ -135,9 +135,9 @@ install_fw() {
         update-vendor-fw
         echo "Firmware installed."
         read -sp "Press Enter to continue..."
+}
 
-
-if [[ whoami != "root" ]]; then
+if [[ $(whoami) != "root" ]]; then
         echo "You must run this script as root."
         exit
 fi
