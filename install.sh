@@ -18,8 +18,7 @@ install_overlay() {
 
 install_uboot() {
         echo "Installing U-Boot."
-        EMERGE_DEFAULT_OPTS="" \
-             emerge -qv u-boot
+        emerge -q u-boot
         echo "U-Boot has been installed."
 }
 
@@ -27,8 +26,7 @@ install_uboot() {
 install_grub() {
         echo "Installing GRUB."
         USE="grub_platforms_efi-64" \
-                EMERGE_DEFAULT_OPTS="" \
-                emerge -qv grub:2
+        emerge -q grub:2
         echo "GRUB has been installed."
 }
 
@@ -42,8 +40,7 @@ install_m1n1() {
                 echo "rectify this in another tty and come back to continue."
                 read -sp "Press Enter to continue..."
         done
-        EMERGE_DEFAULT_OPTS="" \
-                emerge -qv m1n1
+        emerge -qv m1n1
         update-m1n1
         echo "m1n1 has been installed."
 }
@@ -57,8 +54,7 @@ merge_kernel_sources() {
         cp resources/kerneluse /etc/portage/package.use/asahi-sources
         # Override the user's default opts in make.conf
         # so they aren't asked again if they want to merge
-        EMERGE_DEFAULT_OPTS="" \
-                emerge -qv asahi-sources
+        emerge -qv asahi-sources
         echo "The patched kernel sources are now available in"
         echo "/usr/src/linux."
 }
@@ -73,8 +69,7 @@ make_kernel() {
         echo
         # Check if dracut is installed
         if [[ ! -f /usr/bin/dracut ]]; then
-                EMERGE_DEFAULT_OPTS="" \
-                        emerge -qv dracut
+                emerge -qv dracut
         fi
 
         zcat /proc/config.gz > /usr/src/linux/.config
