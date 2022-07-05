@@ -145,6 +145,12 @@ fi
 echo "This script automates the setup and configuration of Apple Silicon"
 echo "specific tooling. Please ensure that /boot is mounted where you want, and"
 echo "the Asahi EFI System Partition is mounted to /boot/efi."
+echo
+echo "NOTE: This script will install linux-firmware automatically. It is not"
+echo "possible to run these machines properly without binary blobs. Please make"
+echo sure you understand this, and agree to the linux-fw-redistributable and
+echo "no-source-code licenses before continuing."
+echo
 read -sp "Press Enter to continue..."
 
 }
