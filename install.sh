@@ -25,7 +25,7 @@ install_uboot() {
 
 install_grub() {
         echo "Installing GRUB."
-        USE="grub_platforms_efi-64" \
+        echo "GRUB_PLATFORMS=\"efi-64\"" >> /etc/portage/make.conf
         emerge -q grub:2
         echo "GRUB has been installed."
 }
@@ -52,8 +52,6 @@ merge_kernel_sources() {
                 mkdir -p /etc/portage/package.use
         fi
         cp resources/kerneluse /etc/portage/package.use/asahi-sources
-        # Override the user's default opts in make.conf
-        # so they aren't asked again if they want to merge
         emerge -qv asahi-sources
         echo "The patched kernel sources are now available in"
         echo "/usr/src/linux."
@@ -92,17 +90,25 @@ make_kernel() {
         fi
         make -C /usr/src/linux install
 
-        # We must manually ensure that dracut finds the kernel
-        # and nvme-apple
+        # We must install our dracut config fragment to install softdep drivers
+        if [[ ! -d /etc/dracut.conf.d ]]; then
+                mkdir -p /etc/dracut.conf.d
+        fi
+        cp resources/dracut.conf /etc/dracut.conf.d/10-apple.conf
         dracut \
                 --force \
                 --quiet \
-                --add-drivers="nvme-apple" \
                 --kver ${KERNVER} \
                 --compress gzip \
                 /boot/initramfs-${KERNVER}.img
 
         # We need to rebuild GRUB
+        while [[ ! -d /boot/efi/vendorfw ]]; do
+                echo "Your EFI System Partition is not mounted at /boot/efi."
+                echo "Please switch to another TTY and do this now. Remember that"
+                echo "the other TTYs will still be in the LiveCD root."
+                read -sp "Press Enter to continue..."
+        done
         grub-install --removable --efi-directory=/boot/efi --boot-directory=/boot
         grub-mkconfig -o /boot/grub/grub.cfg
 }
