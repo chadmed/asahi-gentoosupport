@@ -153,8 +153,6 @@ echo "no-source-code licenses before continuing."
 echo
 read -sp "Press Enter to continue..."
 
-}
-
 
 install_overlay
 
