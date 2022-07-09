@@ -69,7 +69,8 @@ make_kernel() {
         if [[ ! -f /usr/bin/dracut ]]; then
                 emerge -qv dracut
         fi
-
+        echo "sys-apps/kmod zstd" >> /etc/portage/package.use/asahi-sources
+        emerge -qv kmod
         zcat /proc/config.gz > /usr/src/linux/.config
 
         make -C /usr/src/linux -j $(nproc)
