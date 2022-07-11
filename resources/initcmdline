@@ -1,1 +1,0 @@
-root=live:/squash.img ro console=tty0 init=/sbin/init

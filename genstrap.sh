@@ -89,7 +89,8 @@ mkdir -p overlay \
         overlay/etc/cmdline.d \
         overlay/mnt/efi
 cp new.squashfs overlay/squash.img
-cp resources/initcmdline overlay/etc/cmdline.d/01-default.conf
+echo "root=live:/squash.img ro console=tty0 init=/sbin/init" \
+     > overlay/etc/cmdline.d/01-default.conf
 
 dracut --force \
     --quiet \
