@@ -32,14 +32,9 @@ install_grub() {
 
 
 install_m1n1() {
-         echo "Installing m1n1."
-         cp resources/update-m1n1.sh /bin/update-m1n1
-         chmod a+x /bin/update-m1n1
-         while [[ ! -d /boot/efi ]]; do
-                echo "It seems the ESP is not mounted at /boot/efi. Please"
-                echo "rectify this in another tty and come back to continue."
-                read -sp "Press Enter to continue..."
-        done
+        echo "Installing m1n1."
+        cp resources/update-m1n1.sh /bin/update-m1n1
+        chmod a+x /bin/update-m1n1
         emerge -qv m1n1
         update-m1n1
         echo "m1n1 has been installed."
@@ -104,12 +99,6 @@ make_kernel() {
                 /boot/initramfs-${KERNVER}.img
 
         # We need to rebuild GRUB
-        while [[ ! -d /boot/efi/vendorfw ]]; do
-                echo "Your EFI System Partition is not mounted at /boot/efi."
-                echo "Please switch to another TTY and do this now. Remember that"
-                echo "the other TTYs will still be in the LiveCD root."
-                read -sp "Press Enter to continue..."
-        done
         grub-install --removable --efi-directory=/boot/efi --boot-directory=/boot
         grub-mkconfig -o /boot/grub/grub.cfg
 }
@@ -122,15 +111,7 @@ install_fw() {
         echo "software you want before you reboot."
         read -sp "Press Enter to continue..."
         echo
-        echo "Extracting firmware"
-
-        while [[ ! -f /boot/efi/vendorfw/firmware.tar ]]; do
-                echo "linux-firmware.tar not found on /boot/efi."
-                echo "Please ensure the EFI System Partition set up"
-                echo "by the Asahi Installer is mounted at /boot/efi."
-                echo
-                read -sp "Press Enter to try again..."
-        done
+        echo "Extracting firmware..."
 
         if [[ ! -d /lib/firmware ]]; then
                 echo "sys-kernel/linux-firmware linux-fw-redistributable no-source-code" >> /etc/portage/package.license
@@ -146,8 +127,17 @@ install_fw() {
 
 if [[ $(whoami) != "root" ]]; then
         echo "You must run this script as root."
-        exit
+        exit 1
 fi
+
+if [[ ! -d /boot/efi/vendorfw ]]; then
+        echo "You must mount the Asahi EFI System Partition to /boot/efi."
+        echo "This is absolutely necessary for the proper functioning of the"
+        echo "system. Please mount the ESP at /boot/efi and add it to your"
+        echo "fstab before continuing."
+        exit 1
+fi
+
 
 echo "This script automates the setup and configuration of Apple Silicon"
 echo "specific tooling. Please ensure that /boot is mounted where you want, and"
