@@ -46,7 +46,7 @@ merge_kernel_sources() {
         if [[ ! -d /etc/portage/package.use ]]; then
                 mkdir -p /etc/portage/package.use
         fi
-        cp resources/kerneluse /etc/portage/package.use/asahi-sources
+        echo "sys-kernel/asahi-sources symlink" >> /etc/portage/package.use/kernel
         emerge -qv asahi-sources
         echo "The patched kernel sources are now available in"
         echo "/usr/src/linux."
@@ -64,7 +64,7 @@ make_kernel() {
         if [[ ! -f /usr/bin/dracut ]]; then
                 emerge -qv dracut
         fi
-        echo "sys-apps/kmod zstd" >> /etc/portage/package.use/asahi-sources
+        echo "sys-apps/kmod zstd" >> /etc/portage/package.use/kernel
         emerge -qv kmod
         zcat /proc/config.gz > /usr/src/linux/.config
 
