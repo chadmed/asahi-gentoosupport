@@ -120,6 +120,8 @@ install_fw() {
 
         cp resources/update-vendor-fw.sh /bin/update-vendor-fw
         chmod a+x /bin/update-vendor-fw
+        cp resources/apple-firmware.start /etc/local.d/apple-firmware.start
+        chmod +x /etc/local.d/apple-firmware.start
         update-vendor-fw
         echo "Firmware installed."
         read -sp "Press Enter to continue..."
