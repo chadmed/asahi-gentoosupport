@@ -34,7 +34,7 @@ echo
 cleanup
 
 echo "Installing dependencies..."
-pacman -S squashfs-tools dracut cpio parted
+pacman -S --needed squashfs-tools dracut cpio parted
 
 echo "Extracting squashfs..."
 bsdtar -xf install.iso --include image.squashfs
