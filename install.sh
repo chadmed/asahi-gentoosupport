@@ -106,6 +106,9 @@ install_fw() {
         echo "software you want before you reboot."
         read -sp "Press Enter to continue..."
         echo
+        echo "Installing firmware management scripts"
+        emerge -q asahi-firmware
+        echo
         echo "Extracting firmware..."
 
         if [[ ! -d /lib/firmware ]]; then
@@ -113,11 +116,7 @@ install_fw() {
                 emerge -qv linux-firmware
         fi
 
-        cp resources/update-vendor-fw.sh /bin/update-vendor-fw
-        chmod a+x /bin/update-vendor-fw
-        cp resources/apple-firmware.start /etc/local.d/apple-firmware.start
-        chmod +x /etc/local.d/apple-firmware.start
-        update-vendor-fw
+        /usr/sbin/asahi-fwextract
         echo "Firmware installed."
         read -sp "Press Enter to continue..."
 }
