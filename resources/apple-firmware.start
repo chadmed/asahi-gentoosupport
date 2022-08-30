@@ -1,5 +1,0 @@
-#!/bin/bash
-# SPDX-License-Identifier: MIT
-
-# Check for updates to Apple Silicon firmware at boot
-exec /bin/update-vendor-fw
