@@ -33,8 +33,6 @@ install_grub() {
 
 install_m1n1() {
         echo "Installing m1n1."
-        cp resources/update-m1n1.sh /bin/update-m1n1
-        chmod a+x /bin/update-m1n1
         emerge -qv m1n1
         update-m1n1
         echo "m1n1 has been installed."
@@ -141,7 +139,7 @@ echo "the Asahi EFI System Partition is mounted to /boot/efi."
 echo
 echo "NOTE: This script will install linux-firmware automatically. It is not"
 echo "possible to run these machines properly without binary blobs. Please make"
-echo sure you understand this, and agree to the linux-fw-redistributable and
+echo "sure you understand this, and agree to the linux-fw-redistributable and"
 echo "no-source-code licenses before continuing."
 echo
 read -sp "Press Enter to continue..."
