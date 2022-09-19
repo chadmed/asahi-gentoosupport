@@ -59,9 +59,8 @@ make_kernel() {
         read -sp "Press Enter to continue..."
         echo
         # Check if genkernel is installed
-        if [[ ! -f /usr/bin/genkernel ]]; then
-                echo "sys-kernel/linux-firmware linux-fw-redistributable no-source-code" >> /etc/portage/package.license
-                emerge -qv genkernel
+        if [[ ! -f /usr/bin/dracut ]]; then
+                emerge -qv dracut
         fi
         echo "sys-apps/kmod zstd" >> /etc/portage/package.use/kernel
         emerge -qv kmod
@@ -85,11 +84,10 @@ make_kernel() {
         fi
         make -C /usr/src/linux install
 
-        # Build initramfs (takes longer than dracut, but works)
-        genkernel \
-            --kernel-config=/usr/src/linux/.config \
-            --all-ramdisk-modules \
-            initramfs
+        if [[ ! -d /etc/dracut.conf.d/ ]]; then
+                mkdir -p /etc/dracut.conf.d/
+        fi
+        cp resources/dracut.conf /etc/dracut.conf.d/10-apple.conf
 
         # We need to rebuild GRUB
         grub-install --removable --efi-directory=/boot/efi --boot-directory=/boot
