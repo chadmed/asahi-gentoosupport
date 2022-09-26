@@ -88,7 +88,13 @@ make_kernel() {
                 mkdir -p /etc/dracut.conf.d/
         fi
         cp resources/dracut.conf /etc/dracut.conf.d/10-apple.conf
-
+        dracut \
+                --force \
+                --quiet \
+                --kver ${KERNVER} \
+                --compress gzip \
+                /boot/initramfs-${KERNVER}.img
+        
         # We need to rebuild GRUB
         grub-install --removable --efi-directory=/boot/efi --boot-directory=/boot
         grub-mkconfig -o /boot/grub/grub.cfg
