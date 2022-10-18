@@ -42,7 +42,7 @@ bsdtar -xf install.iso --include image.squashfs
 echo "Creating temporary mount..."
 echo
 mkdir /mnt/temp
-modprobe brd rd_nr=1 rd_size=923600
+modprobe brd rd_nr=1 rd_size=1240000
 
 if [[ $? -ne 0 ]]; then
     echo "ERROR: could not create ram block device. Installing asahi-dev"
