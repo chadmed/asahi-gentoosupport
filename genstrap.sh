@@ -67,10 +67,10 @@ echo "Setting up Gentoo live environment for Apple Silicon..."
 echo
 cd squashfs-root
 rm -rf lib/firmware/{iwlwifi*,qcom,amd*,advansys,intel,nvidia,rtlwifi}
+rm -rf lib/firmare/{rockchip,myr*,mwl*,atmel,bnx*,3com,ti*,ql*}
 rm -rf lib/modules/*gentoo*
 cp -r /lib/modules/$(uname -r) lib/modules/
-# decompress kernel modules
-find lib/modules/$(uname -r) -name '*.ko.zst' -exec zstd -d -q --rm '{}' \;
+
 depmod -a --basedir=. $(uname -r)
 
 cp -r /lib/firmware/brcm/. lib/firmware/brcm/.
