@@ -62,6 +62,11 @@ make_kernel() {
         if [[ ! -f /usr/bin/dracut ]]; then
                 emerge -qv dracut
         fi
+
+        if [[ ! -e /usr/lib/dracut/modules.d/99asahi ]]; then
+                cp -r resources/dracut_module /usr/lib/dracut/modules.d/99asahi
+        fi
+
         echo "sys-apps/kmod zstd" >> /etc/portage/package.use/kernel
         emerge -qv kmod
         zcat /proc/config.gz > /usr/src/linux/.config
@@ -94,7 +99,7 @@ make_kernel() {
                 --kver ${KERNVER} \
                 --compress gzip \
                 /boot/initramfs-${KERNVER}.img
-        
+
         # We need to rebuild GRUB
         grub-install --removable --efi-directory=/boot/efi --boot-directory=/boot
         grub-mkconfig -o /boot/grub/grub.cfg
