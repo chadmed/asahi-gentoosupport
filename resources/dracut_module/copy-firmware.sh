@@ -1,8 +1,6 @@
 #!/bin/sh
 
-# Borrowed from asahi-scripts, which is (C) The Asahi Linux Contributors under the MIT license
-
-NEWROOT="/sysroot"
+# Adapted from asahi-scripts, which is (C) The Asahi Linux Contributors under the MIT license
 
 if [ -e /vendorfw ]; then
     echo "Asahi: Vendor firmware was loaded by the bootloader"
@@ -14,6 +12,8 @@ if [ ! -e /proc/device-tree/chosen/asahi,efi-system-partition ]; then
     return 1
 fi
 
+# This needs to happen before udev loads so that the FW
+# is available for devices
 echo "Asahi: Triggering early load of NVMe modules..."
 modprobe apple-mailbox
 modprobe nvme-apple
@@ -30,5 +30,19 @@ fi
 
 # If the above exists, hopefully the /dev device exists and this will work
 echo "Asahi: Unpacking vendor firmware into initramfs..."
-mkdir -p /vendorfw
-TARGET=/vendorfw sh /usr/local/bin/update-vendor-firmware
+
+VENDORFW="/run/.system-efi/vendorfw/"
+
+(
+    . /usr/share/asahi-scripts/functions.sh
+    mount_sys_esp /run/.system-efi
+)
+
+if [ ! -e "$VENDORFW/firmware.cpio" ]; then
+    echo "Asahi: Vendor firmware not found in ESP."
+    umount /run/.system-efi
+    return 1
+fi
+
+( cd /; cpio -i < "$VENDORFW/firmware.cpio" )
+echo "Asahi firmware unpacked successfully"

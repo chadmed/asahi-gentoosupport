@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 # only install if asked for
 check() {
@@ -14,7 +14,7 @@ depends() {
 # put our stuff in the initramfs
 install() {
 
-    inst_multiple -o /usr/local/bin/update-vendor-firmware comm /usr/local/share/asahi-scripts/* cut dirname seq tar
+    inst_multiple -o comm /usr/share/asahi-scripts/* cut dirname seq tar
 
     # Run hook before udev to copy firmware
     inst_hook pre-mount 99 "$moddir/copy-firmware.sh"
