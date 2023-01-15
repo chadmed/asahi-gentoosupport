@@ -74,6 +74,7 @@ cp -r /lib/modules/$(uname -r) lib/modules/
 depmod -a --basedir=. $(uname -r)
 
 cp -r /lib/firmware/brcm/. lib/firmware/brcm/.
+cp -r /lib/firmware/vendor lib/firmware/
 # The squashfs doesn't log in automatically for some reason?
 echo "agetty_options=\"--autologin root\"" >> etc/conf.d/agetty
 sed -i 's/\<agetty\>/& --autologin root/g' etc/inittab
@@ -102,7 +103,6 @@ dracut --force \
     --add-drivers "nvme-apple" \
     --add-drivers "squashfs" \
     --add-drivers "apple-dart" \
-    --add-drivers "brcmfmac" \
     --add "dmsquash-live" \
     --filesystems "squashfs ext4" \
     --include overlay / \
