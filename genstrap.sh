@@ -44,16 +44,6 @@ echo
 mkdir /mnt/temp
 modprobe brd rd_nr=1 rd_size=923600
 
-if [[ $? -ne 0 ]]; then
-    echo "ERROR: could not create ram block device. Installing asahi-dev"
-    echo "kernel."
-    sed -i 's/asahi/asahi-dev/' /etc/pacman.conf
-    pacman -Syu
-    echo "The asahi-dev kernel has been installed. Please reboot the machine and"
-    echo "run this script again."
-    exit 1
-fi
-
 parted -sf /dev/ram0 mklabel gpt
 parted -sf /dev/ram0 "mkpart root 0 -1"
 mkfs.ext4 /dev/ram0p1
