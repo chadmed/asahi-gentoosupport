@@ -42,7 +42,7 @@ bsdtar -xf install.iso --include image.squashfs
 echo "Creating temporary mount..."
 echo
 mkdir /mnt/temp
-modprobe brd rd_nr=1 rd_size=923600
+modprobe brd rd_nr=1 rd_size=1024000
 
 parted -sf /dev/ram0 mklabel gpt
 parted -sf /dev/ram0 "mkpart root 0 -1"
@@ -56,8 +56,7 @@ unsquashfs -q image.squashfs
 echo "Setting up Gentoo live environment for Apple Silicon..."
 echo
 cd squashfs-root
-rm -rf lib/firmware/{iwlwifi*,qcom,amd*,advansys,intel,nvidia,rtlwifi}
-rm -rf lib/firmare/{rockchip,myr*,mwl*,atmel,bnx*,3com,ti*,ql*}
+rm -rf lib/firmware/*
 rm -rf lib/modules/*gentoo*
 cp -r /lib/modules/$(uname -r) lib/modules/
 
@@ -86,18 +85,30 @@ cp new.squashfs overlay/squash.img
 echo "root=live:/squash.img ro console=tty0 init=/sbin/init" \
      > overlay/etc/cmdline.d/01-default.conf
 
+if [[ -e /etc/dracut.conf.d/ ]]; then
+    cp resources/dracut.conf /etc/dracut.conf.d/10-asahi.conf
+else
+    mkdir /etc/dracut.conf.d/
+    cp resources/dracut.conf /etc/dracut.conf.d/10-asahi.conf
+fi
+
+if [[ -e /usr/local/lib/dracut/modules.d ]]; then
+    cp -r resources/dracut-module /usr/local/lib/dracut/modules.d/99-asahi-firmware
+    chmod a+x /usr/local/lib/dracut/modules.d/99-asahi-firmware/*
+else
+    mkdir -p /usr/local/lib/dracut/modules.d
+    cp -r resources/dracut-module /usr/local/lib/dracut/modules.d/99-asahi-firmware
+    chmod a+x /usr/local/lib/dracut/modules.d/99-asahi-firmware/*
+fi
+
 dracut --force \
     --quiet \
     --kver $(uname -r) \
-    --add-drivers "nvme-apple" \
     --add-drivers "squashfs" \
-    --add-drivers "apple-dart" \
-    --add-drivers "brcmfmac" \
     --add "dmsquash-live" \
     --filesystems "squashfs ext4" \
     --include overlay / \
     ./bootstrap_image.img
-
 
 echo "Setting up initramfs and GRUB..."
 
