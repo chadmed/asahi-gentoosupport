@@ -62,7 +62,7 @@ cp -r /lib/modules/$(uname -r) lib/modules/
 
 depmod -a --basedir=. $(uname -r)
 
-cp -r /lib/firmware/brcm/. lib/firmware/brcm/.
+cp -r /lib/firmware/{vendor,brcm} lib/firmware/
 # The squashfs doesn't log in automatically for some reason?
 echo "agetty_options=\"--autologin root\"" >> etc/conf.d/agetty
 sed -i 's/\<agetty\>/& --autologin root/g' etc/inittab
@@ -92,13 +92,13 @@ else
     cp resources/dracut.conf /etc/dracut.conf.d/10-asahi.conf
 fi
 
-if [[ -e /usr/local/lib/dracut/modules.d ]]; then
-    cp -r resources/dracut-module /usr/local/lib/dracut/modules.d/99-asahi-firmware
-    chmod a+x /usr/local/lib/dracut/modules.d/99-asahi-firmware/*
+if [[ -e /usr/lib/dracut/modules.d ]]; then
+    cp -r resources/dracut-module /usr/lib/dracut/modules.d/99asahi-firmware
+    chmod a+x /usr/lib/dracut/modules.d/99asahi-firmware/*
 else
-    mkdir -p /usr/local/lib/dracut/modules.d
-    cp -r resources/dracut-module /usr/local/lib/dracut/modules.d/99-asahi-firmware
-    chmod a+x /usr/local/lib/dracut/modules.d/99-asahi-firmware/*
+    mkdir -p /usr/lib/dracut/modules.d
+    cp -r resources/dracut-module /usr/lib/dracut/modules.d/99asahi-firmware
+    chmod a+x /usr/lib/dracut/modules.d/99asahi-firmware/*
 fi
 
 dracut --force \
