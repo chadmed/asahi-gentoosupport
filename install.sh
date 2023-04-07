@@ -87,24 +87,25 @@ make_kernel() {
         if [[ ! -d /etc/dracut.conf.d/ ]]; then
                 mkdir -p /etc/dracut.conf.d/
         fi
+
         cp resources/dracut.conf /etc/dracut.conf.d/10-apple.conf
+
         dracut \
                 --force \
                 --quiet \
                 --kver ${KERNVER} \
-                --compress gzip \
-                /boot/initramfs-${KERNVER}.img
-        
+                --compress gzip
+
         # We need to rebuild GRUB
-        grub-install --removable --efi-directory=/boot/efi --boot-directory=/boot
+        grub-install --removable --efi-directory=/boot --boot-directory=/boot
         grub-mkconfig -o /boot/grub/grub.cfg
 }
 
 
 install_fw() {
-        echo "We will now install the Apple Silicon firmware to /lib/firmware."
+        echo "We will now install the Apple Silicon firmware from the ESP."
         echo
-        echo "Be sure to install whatever userspace network/WiFi management"
+        echo "Be sure to install and configure whatever userspace network/WiFi management"
         echo "software you want before you reboot."
         read -sp "Press Enter to continue..."
         echo
@@ -118,7 +119,7 @@ install_fw() {
                 emerge -qv linux-firmware
         fi
 
-        /usr/sbin/asahi-fwextract
+        exec $(which asahi-fwextract)
         echo "Firmware installed."
         read -sp "Press Enter to continue..."
 }
@@ -128,18 +129,16 @@ if [[ $(whoami) != "root" ]]; then
         exit 1
 fi
 
-if [[ ! -d /boot/efi/vendorfw ]]; then
-        echo "You must mount the Asahi EFI System Partition to /boot/efi."
-        echo "This is absolutely necessary for the proper functioning of the"
-        echo "system. Please mount the ESP at /boot/efi and add it to your"
-        echo "fstab before continuing."
+if [[ ! -d /boot/vendorfw ]]; then
+	echo "We use ESP-as-boot. Please mount the Asahi ESP to /boot and"
+        echo "before continuing. This is absolutely essential for the system"
+	echo "to function correctly."
         exit 1
 fi
 
 
 echo "This script automates the setup and configuration of Apple Silicon"
-echo "specific tooling. Please ensure that /boot is mounted where you want, and"
-echo "the Asahi EFI System Partition is mounted to /boot/efi."
+echo "specific tooling for Gentoo Linux. Please mount the ESP to /boot."
 echo
 echo "NOTE: This script will install linux-firmware automatically. It is not"
 echo "possible to run these machines properly without binary blobs. Please make"
@@ -165,4 +164,5 @@ install_fw
 
 echo "This script will now exit. Continue setting up your machine as per the"
 echo "Gentoo Handbook, skipping the steps related to setting up the kernel or"
-echo "GRUB as these have been done for you."
+echo "GRUB as these have been done for you. Don't forget to add /boot to your"
+echo "fstab!"
