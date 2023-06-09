@@ -119,7 +119,7 @@ install_fw() {
                 emerge -qv linux-firmware
         fi
 
-        exec $(which asahi-fwextract)
+        exec $(which asahi-fwupdate)
         echo "Firmware installed."
         read -sp "Press Enter to continue..."
 }
