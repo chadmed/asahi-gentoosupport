@@ -34,7 +34,7 @@ echo
 cleanup
 
 echo "Installing dependencies..."
-pacman -S --needed squashfs-tools dracut cpio parted
+dnf install -y squashfs-tools dracut cpio parted bsdtar
 
 echo "Extracting squashfs..."
 bsdtar -xf install.iso --include image.squashfs
@@ -113,7 +113,7 @@ dracut --force \
 echo "Setting up initramfs and GRUB..."
 
 mv bootstrap_image.img /boot/initramfs-gentoo-live.img
-cat resources/init_grub >> /boot/grub/grub.cfg
+cat resources/init_grub >> /boot/grub2/grub.cfg
 
 cleanup
 modprobe -r brd
