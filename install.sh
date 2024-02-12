@@ -94,7 +94,7 @@ make_kernel() {
                 --force \
                 --quiet \
                 --kver ${KERNVER} \
-                --compress gzip
+                --compress zstd
 
         # We need to rebuild GRUB
         grub-install --removable --efi-directory=/boot --boot-directory=/boot

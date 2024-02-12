@@ -20,7 +20,9 @@ depends() {
 
 # called by dracut
 installkernel() {
-    instmods apple-mailbox nvme-apple
+    # we now build this code in-kernel, not as modules...
+    # ...so we comment out the next line
+    # instmods apple-mailbox nvme-apple vfat
 }
 
 # called by dracut
