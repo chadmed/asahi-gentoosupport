@@ -34,7 +34,7 @@ echo
 cleanup
 
 echo "Installing dependencies..."
-pacman -S --needed squashfs-tools dracut cpio parted
+dnf install squashfs-tools dracut-live cpio parted bsdtar
 
 echo "Extracting squashfs..."
 bsdtar -xf install.iso --include image.squashfs
@@ -85,35 +85,21 @@ cp new.squashfs overlay/squash.img
 echo "root=live:/squash.img ro console=tty0 init=/sbin/init" \
      > overlay/etc/cmdline.d/01-default.conf
 
-if [[ -e /etc/dracut.conf.d/ ]]; then
-    cp resources/dracut.conf /etc/dracut.conf.d/10-asahi.conf
-else
-    mkdir /etc/dracut.conf.d/
-    cp resources/dracut.conf /etc/dracut.conf.d/10-asahi.conf
-fi
-
-if [[ -e /usr/lib/dracut/modules.d ]]; then
-    cp -r resources/dracut-module /usr/lib/dracut/modules.d/99asahi-firmware
-    chmod a+x /usr/lib/dracut/modules.d/99asahi-firmware/*
-else
-    mkdir -p /usr/lib/dracut/modules.d
-    cp -r resources/dracut-module /usr/lib/dracut/modules.d/99asahi-firmware
-    chmod a+x /usr/lib/dracut/modules.d/99asahi-firmware/*
-fi
-
 dracut --force \
     --quiet \
     --kver $(uname -r) \
     --add-drivers "squashfs" \
     --add "dmsquash-live" \
-    --filesystems "squashfs ext4" \
+    --filesystems "squashfs ext4 btrfs vfat" \
     --include overlay / \
+    --no-hostonly \
     ./bootstrap_image.img
 
 echo "Setting up initramfs and GRUB..."
 
+cp /boot/vmlinuz-$(uname -r) /boot/vmlinux-linux-asahi
 mv bootstrap_image.img /boot/initramfs-gentoo-live.img
-cat resources/init_grub >> /boot/grub/grub.cfg
+cat resources/init_grub >> /boot/grub2/grub.cfg
 
 cleanup
 modprobe -r brd
