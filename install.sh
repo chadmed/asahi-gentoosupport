@@ -15,65 +15,47 @@ install_overlay() {
         echo "The Asahi overlay has been installed."
 }
 
+install_meta() {
+        echo "We will now install the Asahi metapackage with some sane"
+        echo "defaults to get you started. This step will:"
+        echo "  * Mask >=dev-lang/rust-1.76.0"
+        echo "  * Mask >=dev-lang/rust-bin-1.76.0"
+        echo "    (Rust for Linux currently only builds with Rust <=1.75)"
+        echo "  * Mask media-libs/mesa::gentoo"
+        echo "  * Emerge rust-bin (you can switch to the compiled rust later)"
+        echo "  * Create /etc/portage/package.use/asahi and set:"
+        echo "          sys-apps/asahi-meta kernel -sources -audio"
+        echo "    If you are planning to use this machine as a desktop, please"
+        echo "    delete '-audio' from this file and emerge -1 asahi-meta BEFORE"
+        echo "    emerging your DE/WM."
+        echo "  * emerge the Asahi metapackage"
+        echo "  * Unpack the Asahi firmware"
+        echo "  * Update m1n1 and U-Boot"
+        read -sp "Press Enter to continue..."
 
-install_uboot() {
-        echo "Installing U-Boot."
-        emerge -q u-boot
-        echo "U-Boot has been installed."
+        [ ! -d /etc/portage/package.mask ] && mkdir /etc/portage/package.mask
+        cp resources/package.mask /etc/portage/package.mask/asahi
+        [ ! -d /etc/portage/package.use ] && mkdir /etc/portage/package.use
+        cp resources/package.use /etc/portage/package.use/asahi
+        [ ! -d /etc/portage/package.license ] && mkdir /etc/portage/package.license
+        cat "sys-kernel/linux-firmware linux-fw-redistributable no-source-code" > /etc/portage/package.license/firmware
+
+        emerge -q1 dev-lang/rust-bin
+        emerge -q virtual/rust
+        emerge -q sys-apps/asahi-meta virtual/dist-kernel sys-kernel/linux-firmware
+        asahi-fwupdate
+        update-m1n1
 }
-
 
 install_grub() {
         echo "Installing GRUB."
         echo "GRUB_PLATFORMS=\"efi-64\"" >> /etc/portage/make.conf
         emerge -q grub:2
+        grub-install --boot-directory=/boot/ --efi-directory=/boot/ --removable
+        grub-mkconfig -o /boot/grub/grub.cfg
         echo "GRUB has been installed."
 }
 
-
-install_m1n1() {
-        echo "Installing m1n1."
-        emerge -qv m1n1
-        update-m1n1
-        echo "m1n1 has been installed."
-}
-
-
-install_distkernel() {
-        echo "We will now install the Asahi dist-kernel for you."
-        echo
-        read -sp "Press Enter to continue..."
-        echo
-
-        emerge -q sys-kernel/asahi-kernel virtual/dist-kernel
-
-        # We need to rebuild GRUB
-        grub-install --removable --efi-directory=/boot --boot-directory=/boot
-        grub-mkconfig -o /boot/grub/grub.cfg
-}
-
-
-install_fw() {
-        echo "We will now install the Apple Silicon firmware from the ESP."
-        echo
-        echo "Be sure to install and configure whatever userspace network/WiFi management"
-        echo "software you want before you reboot."
-        read -sp "Press Enter to continue..."
-        echo
-        echo "Installing firmware management scripts"
-        emerge -q asahi-firmware
-        echo
-        echo "Extracting firmware..."
-
-        if [[ ! -d /lib/firmware ]]; then
-                echo "sys-kernel/linux-firmware linux-fw-redistributable no-source-code" >> /etc/portage/package.license
-                emerge -qv linux-firmware
-        fi
-
-        asahi-fwupdate
-        echo "Firmware installed."
-        read -sp "Press Enter to continue..."
-}
 
 if [[ $(whoami) != "root" ]]; then
         echo "You must run this script as root."
@@ -101,15 +83,9 @@ read -sp "Press Enter to continue..."
 
 install_overlay
 
-install_uboot
+install_meta
 
 install_grub
-
-install_distkernel
-
-install_m1n1
-
-install_fw
 
 echo "This script will now exit. Continue setting up your machine as per the"
 echo "Gentoo Handbook, skipping the steps related to setting up the kernel or"

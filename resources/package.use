@@ -1,0 +1,4 @@
+# Remove '-audio' before emerging a DE metapackage or WM
+# Remove 'kernel' and '-sources' if you plan to replace the
+# dist-kernel with sys-kernel/asahi-sources
+sys-apps/asahi-meta kernel -sources -audio
