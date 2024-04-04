@@ -39,8 +39,6 @@ install_meta() {
         cp resources/package.use /etc/portage/package.use/asahi
         [ ! -d /etc/portage/package.license ] && mkdir /etc/portage/package.license
         cat "sys-kernel/linux-firmware linux-fw-redistributable no-source-code" > /etc/portage/package.license/firmware
-        [ ! -d /etc/portage/package.accept_keywords ] && mkdir /etc/portage/package.accept_keywords
-        cp resources/package.accept_keywords /etc/portage/package.accept_keywords/asahi
 
         emerge -q1 dev-lang/rust-bin
         emerge -q virtual/rust

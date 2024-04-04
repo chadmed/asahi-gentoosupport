@@ -1,6 +1,0 @@
-# Accept ~arm64 for Asahi Mesa and its only unstable dependency
-media-libs/mesa::asahi ~arm64
-dev-libs/libclc ~arm64
-
-# Accept ~arm64 for asahi-meta
-sys-apps/asahi-meta::asahi ~arm64
