@@ -97,7 +97,7 @@ dracut --force \
 
 echo "Setting up initramfs and GRUB..."
 
-cp /boot/vmlinuz-$(uname -r) /boot/vmlinux-linux-asahi
+cp /boot/vmlinuz-$(uname -r) /boot/vmlinuz-linux-asahi
 mv bootstrap_image.img /boot/initramfs-gentoo-live.img
 cat resources/init_grub >> /boot/grub2/grub.cfg
 
