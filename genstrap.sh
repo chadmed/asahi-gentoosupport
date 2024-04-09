@@ -91,6 +91,7 @@ dracut --force \
     --add-drivers "squashfs" \
     --add "dmsquash-live" \
     --filesystems "squashfs ext4 btrfs vfat" \
+    --install "grep mkdir" \
     --include overlay / \
     --no-hostonly \
     ./bootstrap_image.img
