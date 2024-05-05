@@ -3,8 +3,3 @@ media-libs/mesa::gentoo
 
 # Mask the upstream dist-kernel virtual so it doesn't try to force kernel upgrades
 virtual/dist-kernel::gentoo
-
-# Mask rust >= 1.76 so that the kernel actually builds
->=virtual/rust-1.76.0
->=dev-lang/rust-1.76.0
->=dev-lang/rust-bin-1.76.0

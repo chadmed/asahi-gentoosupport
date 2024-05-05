@@ -18,9 +18,6 @@ install_overlay() {
 install_meta() {
         echo "We will now install the Asahi metapackage with some sane"
         echo "defaults to get you started. This step will:"
-        echo "  * Mask >=dev-lang/rust-1.76.0"
-        echo "  * Mask >=dev-lang/rust-bin-1.76.0"
-        echo "    (Rust for Linux currently only builds with Rust <=1.75)"
         echo "  * Mask media-libs/mesa::gentoo"
         echo "  * Emerge rust-bin (you can switch to the compiled rust later)"
         echo "  * Create /etc/portage/package.use/asahi and set:"
