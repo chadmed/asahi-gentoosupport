@@ -10,7 +10,8 @@ install_overlay() {
         echo "https://github.com/chadmed/asahi-overlay/"
         echo
 
-        cp resources/repo.conf /etc/portage/repos.conf/asahi.conf
+        emerge -q eselect-repository
+        eselect repository enable asahi
         emaint sync -r asahi
         echo "The Asahi overlay has been installed."
 }
