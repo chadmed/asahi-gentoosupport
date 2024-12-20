@@ -40,7 +40,7 @@ install_meta() {
 	echo "VIDEO_CARDS=\"asahi\"" >> /etc/portage/make.conf
 
         emerge -q1 dev-lang/rust-bin
-        emerge -q sys-apps/asahi-meta virtual/dist-kernel sys-kernel/linux-firmware
+        emerge -q sys-apps/asahi-meta virtual/dist-kernel:asahi sys-kernel/linux-firmware
         asahi-fwupdate
         update-m1n1
 }
