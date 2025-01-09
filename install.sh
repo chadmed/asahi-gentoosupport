@@ -64,8 +64,8 @@ if [[ $(whoami) != "root" ]]; then
 fi
 
 if [[ ! -d /boot/vendorfw ]]; then
-        echo "We use ESP-as-boot. Please mount the Asahi ESP to /boot and"
-        echo "before continuing. This is absolutely essential for the system"
+        echo "We use ESP-as-boot. Please mount the Asahi ESP to /boot before"
+        echo "continuing. This is absolutely essential for the system"
         echo "to function correctly."
         exit 1
 fi
