@@ -21,23 +21,15 @@ install_meta() {
         echo "defaults to get you started. This step will:"
         echo "  * Mask media-libs/mesa::gentoo"
         echo "  * Emerge rust-bin (you can switch to the compiled rust later)"
-        echo "  * Create /etc/portage/package.use/asahi and set:"
-        echo "          sys-apps/asahi-meta kernel -sources -audio"
-        echo "     The audio USE flag is disabled to reduce the compilation time"
-        echo "     required to reach a bootable state."
-        echo "     If you are plan to use this device with audio support, please"
-        echo "     delete '-audio' from this file and emerge -1 asahi-meta BEFORE"
-        echo "     emerging your DE/WM."
         echo "  * Add VIDEO_CARDS=\"asahi\" to /etc/portage/make.conf"
         echo "  * Emerge the Asahi metapackage"
+        echo "  * Emerge the Asahi dist-kernel (you may switch to asahi-sources later)"
         echo "  * Unpack the Asahi firmware"
         echo "  * Update m1n1 and U-Boot"
         read -sp "Press Enter to continue..."
 
         [ ! -d /etc/portage/package.mask ] && mkdir /etc/portage/package.mask
         cp resources/package.mask /etc/portage/package.mask/asahi
-        [ ! -d /etc/portage/package.use ] && mkdir /etc/portage/package.use
-        cp resources/package.use /etc/portage/package.use/asahi
         [ ! -d /etc/portage/package.license ] && mkdir /etc/portage/package.license
         echo "sys-kernel/linux-firmware linux-fw-redistributable no-source-code" > /etc/portage/package.license/firmware
 	echo "VIDEO_CARDS=\"asahi\"" >> /etc/portage/make.conf
