@@ -30,6 +30,8 @@ install_meta() {
 
         [ ! -d /etc/portage/package.mask ] && mkdir /etc/portage/package.mask
         cp resources/package.mask /etc/portage/package.mask/asahi
+        [ ! -d /etc/portage/package.use ] && mkdir /etc/portage/package.use
+        cp resources/package.use /etc/portage/package.use/asahi
         [ ! -d /etc/portage/package.license ] && mkdir /etc/portage/package.license
         echo "sys-kernel/linux-firmware linux-fw-redistributable no-source-code" > /etc/portage/package.license/firmware
 	echo "VIDEO_CARDS=\"asahi\"" >> /etc/portage/make.conf

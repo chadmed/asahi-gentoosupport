@@ -1,0 +1,2 @@
+dev-lang/rust-bin rustfmt rust-src
+dev-lang/rust rustfmt rust-src
