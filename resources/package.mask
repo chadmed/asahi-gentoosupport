@@ -1,5 +1,2 @@
-# Mask the upstream Mesa so it doesn't smush Asahi
-media-libs/mesa::gentoo
-
 # Mask the upstream dist-kernel virtual so it doesn't try to force kernel upgrades
 virtual/dist-kernel::gentoo

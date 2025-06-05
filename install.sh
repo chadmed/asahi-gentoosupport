@@ -19,7 +19,6 @@ install_overlay() {
 install_meta() {
         echo "We will now install the Asahi metapackage with some sane"
         echo "defaults to get you started. This step will:"
-        echo "  * Mask media-libs/mesa::gentoo"
         echo "  * Emerge rust-bin (you can switch to the compiled rust later)"
         echo "  * Add VIDEO_CARDS=\"asahi\" to /etc/portage/make.conf"
         echo "  * Emerge the Asahi metapackage"
